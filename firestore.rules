@@ -1,0 +1,59 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // Correos que pueden editar desde admin.html y ver los resultados del talent
+    function esAdmin() {
+      return request.auth != null
+        && request.auth.token.email in [
+          'TU-CORREO@gmail.com'
+        ];
+    }
+
+    match /eventos/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /galeria/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    match /config/{id} {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    // ===== TALENT =====
+
+    function talentCfg() {
+      return get(/databases/$(database)/documents/talent/config).data;
+    }
+
+    // Configuración del talent: todos la leen (para ver participantes), solo admin la cambia
+    match /talent/config {
+      allow read: if true;
+      allow write: if esAdmin();
+    }
+
+    // Votos: el público solo puede CREAR uno por dispositivo y ronda.
+    // Solo admin puede leerlos o borrarlos; nadie puede editarlos.
+    match /talentVotos/{votoId} {
+      allow create: if talentCfg().abierto == true
+        && request.resource.data.keys().hasOnly(['p1', 'p2', 'p3', 'ronda', 'creado'])
+        && request.resource.data.keys().hasAll(['p1', 'p2', 'p3', 'ronda', 'creado'])
+        && request.resource.data.ronda == talentCfg().ronda
+        && votoId.matches('^' + talentCfg().ronda + '_[A-Za-z0-9]{20}$')
+        && request.resource.data.p1 in talentCfg().participantes
+        && request.resource.data.p2 in talentCfg().participantes
+        && request.resource.data.p3 in talentCfg().participantes
+        && request.resource.data.p1 != request.resource.data.p2
+        && request.resource.data.p1 != request.resource.data.p3
+        && request.resource.data.p2 != request.resource.data.p3
+        && request.resource.data.creado == request.time;
+      allow read, delete: if esAdmin();
+      allow update: if false;
+    }
+  }
+}

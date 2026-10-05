@@ -1,0 +1,543 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Vota | Talento con Propósito</title>
+<meta name="theme-color" content="#09090b">
+<link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  *{margin:0;padding:0;box-sizing:border-box}
+  :root{
+    --orange:#f97316; --orange-light:#fdba74; --orange-deep:#ea580c;
+    --dark:#09090b; --card:#111113; --field:#18181b; --line:#27272a;
+    --muted:#a1a1aa; --text:#f4f4f5; --ok:#22c55e; --err:#f87171;
+    --oro:#facc15; --plata:#d4d4d8; --bronce:#f59e5b;
+  }
+  html{scroll-padding-top:env(safe-area-inset-top,0px)}
+  body{
+    font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;
+    color:var(--text);min-height:100vh;
+    padding-top:env(safe-area-inset-top,0px);
+    background:
+      radial-gradient(circle at 20% 0%, rgba(249,115,22,.20), transparent 32%),
+      radial-gradient(circle at 90% 20%, rgba(251,146,60,.08), transparent 26%),
+      var(--dark);
+  }
+  [hidden]{display:none!important}
+  button{font:inherit;color:inherit}
+  :focus-visible{outline:3px solid rgba(249,115,22,.6);outline-offset:2px}
+
+  /* ===== HERO ===== */
+  .hero{text-align:center;padding:38px 18px 14px;position:relative;overflow:hidden}
+  /* Luces de escenario */
+  .luces{position:absolute;inset:0;pointer-events:none}
+  .luces span{position:absolute;top:-30px;width:180px;height:520px;transform-origin:50% 0;
+    background:linear-gradient(to bottom, rgba(253,186,116,.38), rgba(249,115,22,.10) 55%, transparent 85%);
+    clip-path:polygon(42% 0, 58% 0, 100% 100%, 0 100%);filter:blur(6px);mix-blend-mode:screen}
+  .luces span:nth-child(1){left:calc(50% - 260px);animation:barrerA 7s ease-in-out infinite alternate}
+  .luces span:nth-child(2){left:calc(50% + 80px);animation:barrerB 8s ease-in-out infinite alternate}
+  .luces span:nth-child(3){left:calc(50% - 90px);opacity:.55;animation:barrerA 10s ease-in-out infinite alternate-reverse}
+  @keyframes barrerA{from{transform:rotate(-24deg)}to{transform:rotate(14deg)}}
+  @keyframes barrerB{from{transform:rotate(22deg)}to{transform:rotate(-16deg)}}
+  /* Chispas que suben */
+  .chispas{position:absolute;inset:0;pointer-events:none}
+  .chispas i{position:absolute;bottom:-10px;width:4px;height:4px;border-radius:50%;background:#fde68a;box-shadow:0 0 8px 2px rgba(253,186,116,.8);opacity:0;animation:subir linear infinite}
+  @keyframes subir{0%{transform:translateY(0) scale(.6);opacity:0}15%{opacity:1}100%{transform:translateY(-320px) scale(1.1);opacity:0}}
+  .brillo{background:linear-gradient(100deg,var(--orange) 20%,#fde68a 45%,#fff7ed 50%,#fde68a 55%,var(--orange) 80%);background-size:250% 100%;-webkit-background-clip:text;background-clip:text;color:transparent!important;animation:brillar 5s linear infinite}
+  @keyframes brillar{from{background-position:120% 0}to{background-position:-130% 0}}
+  .verso{margin:16px auto 0;max-width:34ch;color:#d4d4d8;font-size:.95rem;line-height:1.5;font-style:italic}
+  .verso small{display:block;margin-top:4px;font-style:normal;font-weight:800;color:var(--orange-light);font-size:.78rem}
+  .hero::before{content:"";position:absolute;width:420px;height:420px;background:rgba(249,115,22,.14);filter:blur(90px);border-radius:50%;top:-220px;left:50%;transform:translateX(-50%);pointer-events:none}
+  .hero-in{position:relative;max-width:560px;margin:0 auto}
+  .logo{width:92px;height:auto;margin:0 auto 14px;display:block;filter:drop-shadow(0 8px 20px rgba(0,0,0,.4))}
+  .badge{display:inline-flex;align-items:center;gap:7px;padding:6px 14px;border:1px solid rgba(249,115,22,.45);background:rgba(249,115,22,.1);color:var(--orange-light);border-radius:99px;font-size:.78rem;font-weight:800;margin-bottom:14px}
+  .badge .vivo{width:8px;height:8px;border-radius:50%;background:var(--ok);box-shadow:0 0 0 0 rgba(34,197,94,.7);animation:latido 1.6s infinite}
+  @keyframes latido{70%{box-shadow:0 0 0 8px rgba(34,197,94,0)}100%{box-shadow:0 0 0 0 rgba(34,197,94,0)}}
+  h1{font-size:clamp(2.3rem,10vw,3.4rem);line-height:.92;font-weight:900;letter-spacing:-.05em}
+  h1 span{color:var(--orange);display:block}
+
+  main{max-width:560px;margin:0 auto;padding:0 16px 200px}
+
+  /* ===== CÓMO VOTAR ===== */
+  .como{margin:22px 0 22px;padding:16px;border-radius:18px;background:rgba(17,17,19,.9);border:1px solid rgba(255,255,255,.08)}
+  .como p{color:#d4d4d8;font-size:.95rem;line-height:1.5;margin-bottom:12px}
+  .como p strong{color:#fff}
+  .medallas{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+  .medalla{display:flex;align-items:center;gap:8px;padding:10px;border-radius:12px;background:var(--field);border:1px solid var(--line);font-weight:800;font-size:.9rem}
+  .medalla i{font-size:1.25rem}
+  .medalla small{display:block;color:var(--muted);font-weight:600;font-size:.75rem}
+  .m1 i{color:var(--oro)} .m2 i{color:var(--plata)} .m3 i{color:var(--bronce)}
+
+  /* ===== LISTA ===== */
+  .lista-tit{display:flex;justify-content:space-between;align-items:baseline;margin:0 4px 10px}
+  .lista-tit h2{font-size:1.15rem;font-weight:900;letter-spacing:-.02em}
+  .lista-tit span{color:var(--muted);font-size:.85rem}
+  .lista{display:flex;flex-direction:column;gap:10px;list-style:none}
+  .lista.entrada li{animation:entrar .5s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes entrar{from{opacity:0;transform:translateY(18px) scale(.97)}}
+  .talento{
+    width:100%;display:flex;align-items:center;gap:14px;text-align:left;
+    background:var(--card);border:1.5px solid var(--line);border-radius:18px;padding:14px 16px;cursor:pointer;
+    transition:border-color .2s, background .2s, transform .12s, box-shadow .2s;
+  }
+  .talento:hover{border-color:rgba(249,115,22,.5)}
+  .talento:active{transform:scale(.98)}
+  .orden{width:44px;height:44px;flex:none;border-radius:14px;display:grid;place-items:center;background:var(--field);border:1px solid var(--line);color:var(--muted);font-weight:900;font-size:.95rem;transition:all .2s}
+  .orden.foto{background:center/cover no-repeat;border:2px solid var(--line);position:relative;border-radius:50%}
+  .orden.foto b{position:absolute;right:-6px;bottom:-6px;min-width:22px;height:22px;padding:0 5px;border-radius:99px;display:grid;place-items:center;background:var(--field);border:2px solid var(--dark);color:var(--muted);font-size:.72rem;font-weight:900}
+  .talento[data-pos] .orden.foto{background-color:transparent}
+  .talento[data-pos="1"] .orden.foto{border:2.5px solid var(--oro)}
+  .talento[data-pos="2"] .orden.foto{border:2.5px solid var(--plata)}
+  .talento[data-pos="3"] .orden.foto{border:2.5px solid var(--bronce)}
+  .talento[data-pos="1"] .orden.foto b{background:var(--oro);color:var(--dark)}
+  .talento[data-pos="2"] .orden.foto b{background:var(--plata);color:var(--dark)}
+  .talento[data-pos="3"] .orden.foto b{background:var(--bronce);color:var(--dark)}
+  .orden.foto{width:52px;height:52px}
+  .lista.compacta .orden.foto{width:46px;height:46px;border-radius:50%}
+  .resumen li img{width:36px;height:36px;border-radius:50%;object-fit:cover;flex:none}
+  .nombre{flex:1;min-width:0;font-size:1.08rem;font-weight:800;line-height:1.25}
+  .nombre small{display:block;font-size:.85rem;font-weight:500;color:var(--muted);margin-top:3px}
+  .pts{flex:none;font-size:.78rem;font-weight:900;padding:5px 10px;border-radius:99px;background:transparent;color:transparent;transition:all .2s}
+
+  .talento[data-pos]{background:linear-gradient(135deg,rgba(249,115,22,.14),rgba(17,17,19,.95) 70%)}
+  .talento[data-pos="1"]{border-color:var(--oro);box-shadow:0 8px 24px rgba(250,204,21,.15)}
+  .talento[data-pos="2"]{border-color:var(--plata);box-shadow:0 8px 24px rgba(212,212,216,.10)}
+  .talento[data-pos="3"]{border-color:var(--bronce);box-shadow:0 8px 24px rgba(245,158,91,.13)}
+  .talento[data-pos] .orden{border:none;color:var(--dark);font-size:1.25rem;animation:pop .3s ease-out}
+  .talento[data-pos="1"] .orden{background:var(--oro)}
+  .talento[data-pos="2"] .orden{background:var(--plata)}
+  .talento[data-pos="3"] .orden{background:var(--bronce)}
+  .talento[data-pos="1"] .pts{background:rgba(250,204,21,.15);color:var(--oro)}
+  .talento[data-pos="2"] .pts{background:rgba(212,212,216,.12);color:var(--plata)}
+  .talento[data-pos="3"] .pts{background:rgba(245,158,91,.15);color:var(--bronce)}
+  @keyframes pop{0%{transform:scale(.3) rotate(-25deg)}70%{transform:scale(1.15) rotate(6deg)}100%{transform:scale(1) rotate(0)}}
+
+  .lista.compacta{gap:8px}
+  .lista.compacta .talento{padding:11px 14px;gap:12px;border-radius:16px}
+  .lista.compacta .orden{width:38px;height:38px;border-radius:12px}
+  .lista.compacta .nombre{font-size:1rem}
+
+  /* ===== BARRA INFERIOR ===== */
+  .barra{position:fixed;left:0;right:0;bottom:0;z-index:10;padding:12px 16px calc(14px + env(safe-area-inset-bottom,0px));background:rgba(9,9,11,.88);backdrop-filter:blur(14px);-webkit-backdrop-filter:blur(14px);border-top:1px solid rgba(249,115,22,.25)}
+  .barra-in{max-width:560px;margin:0 auto}
+  .progreso{height:4px;border-radius:4px;background:var(--line);margin-bottom:10px;overflow:hidden}
+  .progreso i{display:block;height:100%;width:0;border-radius:4px;background:linear-gradient(90deg,var(--orange),var(--oro));box-shadow:0 0 12px rgba(249,115,22,.7);transition:width .35s cubic-bezier(.2,.8,.2,1)}
+  .podio{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:10px}
+  .slot{display:flex;align-items:center;gap:8px;min-width:0;padding:8px 10px;border-radius:12px;background:var(--field);border:1px dashed var(--line);transition:all .2s}
+  .slot i{font-size:1.1rem;opacity:.35;flex:none}
+  .slot span{font-weight:700;font-size:.85rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;color:var(--muted)}
+  .slot.lleno{border-style:solid}
+  .slot.lleno i{opacity:1}
+  .slot.lleno span{color:#fff}
+  .s1 i{color:var(--oro)} .s2 i{color:var(--plata)} .s3 i{color:var(--bronce)}
+  .s1.lleno{border-color:rgba(250,204,21,.6)} .s2.lleno{border-color:rgba(212,212,216,.5)} .s3.lleno{border-color:rgba(245,158,91,.6)}
+  .enviar{width:100%;padding:15px 20px;border:0;border-radius:14px;font-weight:900;font-size:1.05rem;cursor:pointer;color:#fff;background:linear-gradient(135deg,var(--orange),var(--orange-deep));box-shadow:0 12px 28px rgba(249,115,22,.3);transition:transform .15s,opacity .2s,box-shadow .2s}
+  .enviar:not(:disabled):hover{transform:translateY(-2px)}
+  .enviar:not(:disabled){animation:listo .5s ease}
+  .enviar:disabled{background:var(--field);color:var(--muted);box-shadow:none;cursor:not-allowed;animation:none}
+  .enviar i{margin-right:8px}
+  @keyframes listo{40%{transform:scale(1.04)}}
+  .error{margin-bottom:10px;padding:10px 12px;border-radius:12px;background:rgba(248,113,113,.1);border:1px solid rgba(248,113,113,.3);color:#fecaca;font-size:.88rem;line-height:1.45}
+
+  /* ===== ESTADOS ===== */
+  .estado{text-align:center;padding:34px 8px}
+  .estado .icono{width:84px;height:84px;display:grid;place-items:center;margin:0 auto 20px;border-radius:50%;font-size:2.2rem}
+  .estado h2{font-size:clamp(1.7rem,7vw,2.2rem);font-weight:900;letter-spacing:-.03em;line-height:1.05;margin-bottom:10px}
+  .estado p{color:var(--muted);line-height:1.6;max-width:34ch;margin:0 auto}
+  .icono.ok{position:relative;width:104px;height:104px;font-size:2.6rem;background:radial-gradient(circle,rgba(249,115,22,.25),rgba(9,9,11,.9) 70%);color:#fff;animation:pop .5s ease}
+  .icono.ok::before{content:"";position:absolute;inset:-6px;border-radius:50%;background:conic-gradient(from 0deg,var(--orange),var(--oro),transparent 40%,var(--orange) 70%,var(--oro),var(--orange));-webkit-mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));mask:radial-gradient(farthest-side,transparent calc(100% - 4px),#000 calc(100% - 3px));animation:rodar 3s linear infinite}
+  .icono.ok::after{content:"";position:absolute;inset:-18px;border-radius:50%;box-shadow:0 0 60px 10px rgba(249,115,22,.35);z-index:-1}
+  @keyframes rodar{to{transform:rotate(360deg)}}
+  .icono.espera{background:rgba(249,115,22,.1);border:1px solid rgba(249,115,22,.35);color:var(--orange)}
+  .icono.espera i{animation:girar 2.4s ease-in-out infinite}
+  @keyframes girar{0%,40%{transform:rotate(0)}50%,90%{transform:rotate(180deg)}100%{transform:rotate(360deg)}}
+  .resumen{list-style:none;margin:26px auto 0;max-width:340px;text-align:left;display:flex;flex-direction:column;gap:8px}
+  .resumen li{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:14px;background:var(--card);border:1px solid var(--line);font-weight:800}
+  .resumen li i{font-size:1.3rem;width:1.3em;text-align:center}
+  .resumen li:nth-child(1) i{color:var(--oro)} .resumen li:nth-child(2) i{color:var(--plata)} .resumen li:nth-child(3) i{color:var(--bronce)}
+  .gracias-nota{margin-top:22px!important;font-size:.9rem}
+
+  .cargando{display:flex;justify-content:center;gap:8px;padding:60px 0}
+  .cargando span{width:10px;height:10px;border-radius:50%;background:var(--orange);animation:salto 1s infinite ease-in-out}
+  .cargando span:nth-child(2){animation-delay:.15s}.cargando span:nth-child(3){animation-delay:.3s}
+  @keyframes salto{0%,80%,100%{transform:translateY(0);opacity:.4}40%{transform:translateY(-10px);opacity:1}}
+
+  #confeti{position:fixed;inset:0;pointer-events:none;z-index:20}
+
+  .diag{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:12px;right:12px;z-index:50;max-width:560px;margin:0 auto;background:#FFE9E4;color:#5A1208;border-radius:12px;padding:14px 16px;font-size:.95rem;line-height:1.45;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+
+  footer{text-align:center;color:#71717a;font-size:.8rem;padding:10px 20px 0}
+  footer strong{color:#a1a1aa}
+
+  @media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+<div class="diag" id="diag" role="alert" hidden></div>
+<script>
+  window.__fallo = function(msg){
+    var d = document.getElementById('diag');
+    if(d && d.hidden){ d.textContent = msg; d.hidden = false; }
+  };
+  window.addEventListener('error', function(e){ if(e.message) __fallo('Error: ' + e.message); });
+  window.addEventListener('unhandledrejection', function(e){ __fallo('Error: ' + ((e.reason && e.reason.message) || e.reason)); });
+  if(location.protocol === 'file:'){
+    __fallo('Estás abriendo el archivo directo desde la computadora (file://). Súbelo a GitHub Pages o ábrelo con Live Server.');
+  }
+  setTimeout(function(){
+    if(!window.__arranco) __fallo('La página no arrancó. Revisa que firebase-config.js esté en la misma carpeta y abre la consola (F12) para ver el error.');
+  }, 7000);
+</script>
+
+<header class="hero">
+  <div class="luces" aria-hidden="true"><span></span><span></span><span></span></div>
+  <div class="chispas" id="chispas" aria-hidden="true"></div>
+  <div class="hero-in">
+    <img class="logo" src="logo.png" alt="Talento con Propósito" onerror="this.remove()">
+    <div class="badge"><span class="vivo" id="vivo" hidden></span><span id="badgeTxt">Talent Show · Día del Joven Metodista</span></div>
+    <h1>Talento <span class="brillo">con Propósito</span></h1>
+    <p class="verso">“Cada uno según el don que ha recibido, minístrelo a los otros.”<small>1 Pedro 4:10</small></p>
+  </div>
+</header>
+
+<main>
+  <section id="vCargando"><div class="cargando" aria-label="Cargando"><span></span><span></span><span></span></div></section>
+
+  <section id="vVotar" hidden>
+    <div class="como">
+      <p><strong>¿Qué talento te inspiró más?</strong> Toca a tus 3 favoritos en orden. Si te equivocas, tócalo otra vez para quitarlo.</p>
+      <div class="medallas">
+        <div class="medalla m1"><i class="fa-solid fa-medal"></i><div>1° lugar<small>3 puntos</small></div></div>
+        <div class="medalla m2"><i class="fa-solid fa-medal"></i><div>2° lugar<small>2 puntos</small></div></div>
+        <div class="medalla m3"><i class="fa-solid fa-medal"></i><div>3° lugar<small>1 punto</small></div></div>
+      </div>
+    </div>
+    <div class="lista-tit"><h2>Los talentos</h2><span id="cuantos"></span></div>
+    <ul class="lista" id="lista"></ul>
+  </section>
+
+  <section id="vGracias" class="estado" hidden>
+    <div class="icono ok"><i class="fa-solid fa-check"></i></div>
+    <h2>¡Gracias por votar!</h2>
+    <p>Tu voto ya está contado. Celebremos juntos los talentos que Dios nos dio. Los resultados se anuncian al final.</p>
+    <ul class="resumen" id="resumen"></ul>
+    <p class="gracias-nota">Solo se puede votar una vez por celular.</p>
+  </section>
+
+  <section id="vCerrado" class="estado" hidden>
+    <div class="icono espera"><i class="fa-solid fa-hourglass-half" id="cerradoIcono"></i></div>
+    <h2 id="cerradoTit">La votación está cerrada</h2>
+    <p id="cerradoTxt">Disfruta y apoya a cada participante. Cuando abra la votación, esta página se actualiza sola.</p>
+  </section>
+
+  <footer><strong>Talento con Propósito</strong><br>Día del Joven Metodista 2026</footer>
+</main>
+
+<div class="barra" id="barra" hidden>
+  <div class="barra-in">
+    <p class="error" id="error" role="alert" hidden></p>
+    <div class="progreso" aria-hidden="true"><i id="prog"></i></div>
+    <div class="podio">
+      <div class="slot s1" id="slot1"><i class="fa-solid fa-medal"></i><span id="s1">1°</span></div>
+      <div class="slot s2" id="slot2"><i class="fa-solid fa-medal"></i><span id="s2">2°</span></div>
+      <div class="slot s3" id="slot3"><i class="fa-solid fa-medal"></i><span id="s3">3°</span></div>
+    </div>
+    <button class="enviar" id="enviar" disabled>Elige 3 talentos</button>
+  </div>
+</div>
+
+<canvas id="confeti" aria-hidden="true"></canvas>
+
+<script>
+  // Busca firebase-config.js en las ubicaciones más comunes del repo
+  window.__rutasConfig = ['firebase-config.js', '../firebase-config.js', 'js/firebase-config.js', '../js/firebase-config.js'];
+  window.__configLista = new Promise(function(res){
+    (function probar(i){
+      if(window.FIREBASE_CONFIG || i >= __rutasConfig.length) return res(window.FIREBASE_CONFIG);
+      var s = document.createElement('script');
+      s.src = __rutasConfig[i];
+      s.onload = function(){ window.FIREBASE_CONFIG ? res(window.FIREBASE_CONFIG) : probar(i + 1); };
+      s.onerror = function(){ probar(i + 1); };
+      document.head.appendChild(s);
+    })(0);
+  });
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getFirestore, doc, onSnapshot, setDoc, serverTimestamp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+await window.__configLista;
+if(!window.FIREBASE_CONFIG){
+  __fallo("No se encontró firebase-config.js. Lo busqué en: " + window.__rutasConfig.join(", ") + " (relativo a " + location.pathname + ").");
+  throw new Error("Sin config");
+}
+if(/PEGA_AQUI|TU-PROYECTO/.test(JSON.stringify(window.FIREBASE_CONFIG))){
+  __fallo("firebase-config.js todavía tiene los valores de ejemplo. Pega la configuración real de tu proyecto de Firebase.");
+  throw new Error("Config de ejemplo");
+}
+window.__arranco = true;
+
+const db = getFirestore(initializeApp(window.FIREBASE_CONFIG));
+const $ = id => document.getElementById(id);
+const PTS = {1:"+3",2:"+2",3:"+1"};
+const LUGAR = ["1°","2°","3°"];
+
+let cfg = null;
+let elegidos = [];
+let fotos = {};
+const fotoDe = nombre => {
+  const d = (cfg?.detalles || []).find(x => x.talento === nombre);
+  return d && d.id ? fotos[d.id] : null;
+};
+
+function guardado(k){ try{ return localStorage.getItem(k); }catch{ return null; } }
+function guardar(k,v){ try{ localStorage.setItem(k,v); }catch{} }
+
+function idDispositivo(){
+  let id = guardado("talent_dispositivo");
+  if(!id || !/^[A-Za-z0-9]{20}$/.test(id)){
+    const c = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    id = Array.from(crypto.getRandomValues(new Uint8Array(20)), n => c[n % c.length]).join("");
+    guardar("talent_dispositivo", id);
+  }
+  return id;
+}
+
+function mostrar(vista){
+  ["vCargando","vVotar","vGracias","vCerrado"].forEach(v => $(v).hidden = v !== vista);
+  $("barra").hidden = vista !== "vVotar";
+  const abierta = vista === "vVotar";
+  $("vivo").hidden = !abierta;
+  $("badgeTxt").textContent = abierta ? "Votación abierta" : "Talent Show · Día del Joven Metodista";
+}
+
+function cerrado(tit, txt, icono){
+  $("cerradoTit").textContent = tit;
+  $("cerradoTxt").textContent = txt || "Disfruta y apoya a cada participante. Cuando abra la votación, esta página se actualiza sola.";
+  $("cerradoIcono").className = "fa-solid " + (icono || "fa-hourglass-half");
+  mostrar("vCerrado");
+}
+
+let primeraVez = true;
+function pintarLista(){
+  const ul = $("lista");
+  ul.innerHTML = "";
+  ul.classList.toggle("entrada", primeraVez);
+  primeraVez = false;
+  ul.classList.toggle("compacta", cfg.participantes.length > 8);
+  $("cuantos").textContent = cfg.participantes.length + " presentaciones";
+  const integ = Object.fromEntries((cfg.detalles || []).map(d => [d.talento, d.integrantes]));
+  cfg.participantes.forEach((nombre, idx) => {
+    const pos = elegidos.indexOf(nombre) + 1;
+    const li = document.createElement("li");
+    const b = document.createElement("button");
+    b.className = "talento"; b.type = "button";
+    if(pos) b.dataset.pos = pos;
+    b.setAttribute("aria-pressed", pos ? "true" : "false");
+    const foto = fotoDe(nombre);
+    const marca = pos ? LUGAR[pos-1] : idx + 1;
+    b.innerHTML = `<span class="orden${foto ? " foto" : ""}">${foto ? `<b>${marca}</b>` : marca}</span><span class="nombre"></span><span class="pts">${pos ? PTS[pos] : ""}</span>`;
+    if(foto) b.querySelector(".orden").style.backgroundImage = `url("${foto}")`;
+    const nEl = b.querySelector(".nombre");
+    nEl.textContent = nombre;
+    if(integ[nombre]){
+      const sm = document.createElement("small");
+      sm.textContent = integ[nombre];
+      nEl.appendChild(sm);
+    }
+    b.addEventListener("click", e => tocar(nombre, e.currentTarget));
+    if(ul.classList.contains("entrada")) li.style.animationDelay = (idx * 55) + "ms";
+    li.appendChild(b); ul.appendChild(li);
+  });
+  [1,2,3].forEach(i => {
+    $("s"+i).textContent = elegidos[i-1] || LUGAR[i-1];
+    $("slot"+i).classList.toggle("lleno", !!elegidos[i-1]);
+  });
+  $("prog").style.width = (elegidos.length / 3 * 100) + "%";
+  const faltan = 3 - elegidos.length;
+  const btn = $("enviar");
+  btn.disabled = faltan > 0;
+  btn.innerHTML = faltan > 0
+    ? (faltan === 3 ? "Elige tus 3 favoritos" : `Te ${faltan === 1 ? "falta 1" : "faltan " + faltan}`)
+    : '<i class="fa-solid fa-fire"></i>Enviar mi voto';
+}
+
+const COLOR = ["#facc15","#e4e4e7","#f59e5b"];
+function tocar(nombre, boton){
+  $("error").hidden = true;
+  const i = elegidos.indexOf(nombre);
+  if(i >= 0) elegidos.splice(i,1);
+  else if(elegidos.length < 3){
+    elegidos.push(nombre);
+    if(navigator.vibrate) navigator.vibrate(12);
+    const r = boton.querySelector(".orden").getBoundingClientRect();
+    chispazo(r.left + r.width/2, r.top + r.height/2, COLOR[elegidos.length - 1]);
+    if(elegidos.length === 3) setTimeout(() => {
+      const e = $("enviar").getBoundingClientRect();
+      chispazo(e.left + e.width/2, e.top + e.height/2, "#f97316", 28);
+    }, 120);
+  }else{
+    $("error").textContent = "Ya elegiste 3. Quita uno tocándolo para cambiarlo.";
+    $("error").hidden = false;
+  }
+  pintarLista();
+}
+
+function pintarResumen(lista){
+  const ul = $("resumen"); ul.innerHTML = "";
+  lista.forEach(n => {
+    const li = document.createElement("li");
+    li.innerHTML = '<i class="fa-solid fa-medal"></i><span></span>';
+    const foto = fotoDe(n);
+    if(foto){ const im = document.createElement("img"); im.src = foto; im.alt = ""; li.insertBefore(im, li.lastChild); }
+    li.lastChild.textContent = n;
+    ul.appendChild(li);
+  });
+}
+
+function render(){
+  if(!cfg || !Array.isArray(cfg.participantes) || cfg.participantes.length < 3){
+    return cerrado("La votación aún no está lista", "Estamos preparando todo. Esta página se actualiza sola.", "fa-wand-magic-sparkles");
+  }
+  const ya = guardado("talent_voto_" + cfg.ronda);
+  if(ya){
+    try{ pintarResumen(JSON.parse(ya)); }catch{}
+    return mostrar("vGracias");
+  }
+  if(!cfg.abierto) return cerrado("La votación todavía no abre");
+  elegidos = elegidos.filter(n => cfg.participantes.includes(n));
+  pintarLista();
+  mostrar("vVotar");
+}
+
+$("enviar").addEventListener("click", async () => {
+  if(elegidos.length !== 3) return;
+  const btn = $("enviar");
+  btn.disabled = true; btn.textContent = "Enviando…";
+  const id = cfg.ronda + "_" + idDispositivo();
+  try{
+    await setDoc(doc(db, "talentVotos", id), {
+      p1: elegidos[0], p2: elegidos[1], p3: elegidos[2],
+      ronda: cfg.ronda, creado: serverTimestamp()
+    });
+    guardar("talent_voto_" + cfg.ronda, JSON.stringify(elegidos));
+    pintarResumen(elegidos);
+    mostrar("vGracias");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+    confeti();
+  }catch(e){
+    console.error(e);
+    $("error").textContent = e.code === "permission-denied"
+      ? "No se pudo registrar: puede que la votación se haya cerrado o que este celular ya haya votado."
+      : "No se pudo enviar. Revisa tu conexión e inténtalo de nuevo.";
+    $("error").hidden = false;
+    pintarLista();
+  }
+});
+
+/* ===== Efectos: chispas y confeti ===== */
+const sinMovimiento = matchMedia("(prefers-reduced-motion: reduce)").matches;
+const cv = $("confeti"), ctx = cv.getContext("2d");
+let piezas = [], corriendo = false;
+function ajustar(){
+  const d = window.devicePixelRatio || 1;
+  cv.width = innerWidth * d; cv.height = innerHeight * d;
+  ctx.setTransform(d, 0, 0, d, 0, 0);
+}
+addEventListener("resize", ajustar); ajustar();
+
+function lanzar(nuevas){
+  if(sinMovimiento) return;
+  piezas.push(...nuevas);
+  if(!corriendo){ corriendo = true; requestAnimationFrame(cuadro); }
+}
+function cuadro(){
+  ctx.clearRect(0, 0, innerWidth, innerHeight);
+  piezas = piezas.filter(p => --p.vida > 0 && p.y < innerHeight + 40);
+  for(const p of piezas){
+    p.vy += p.g; p.vx *= p.roce; p.x += p.vx; p.y += p.vy; p.r += p.vr;
+    ctx.globalAlpha = Math.min(1, p.vida / 25);
+    ctx.fillStyle = p.c;
+    if(p.redondo){
+      ctx.shadowColor = p.c; ctx.shadowBlur = 8;
+      ctx.beginPath(); ctx.arc(p.x, p.y, p.w, 0, Math.PI * 2); ctx.fill();
+      ctx.shadowBlur = 0;
+    }else{
+      ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.r);
+      ctx.fillRect(-p.w/2, -p.h/2, p.w, p.h * Math.abs(Math.cos(p.r * 2)));
+      ctx.restore();
+    }
+  }
+  ctx.globalAlpha = 1;
+  if(piezas.length) requestAnimationFrame(cuadro);
+  else { corriendo = false; ctx.clearRect(0, 0, innerWidth, innerHeight); }
+}
+
+function chispazo(x, y, color, n = 18){
+  lanzar(Array.from({length: n}, () => {
+    const a = Math.random() * Math.PI * 2, v = 2 + Math.random() * 4.5;
+    return { x, y, vx: Math.cos(a) * v, vy: Math.sin(a) * v - 1.2, g: .12, roce: .97,
+             w: 1.6 + Math.random() * 1.8, r: 0, vr: 0, redondo: true,
+             c: Math.random() < .55 ? color : "#fff7ed", vida: 34 + Math.random() * 22 };
+  }));
+}
+
+function confeti(){
+  const colores = ["#f97316","#fdba74","#facc15","#ffffff","#ea580c","#fde68a"];
+  const pieza = (x, y, ang, fuerza) => ({
+    x, y, vx: Math.cos(ang) * fuerza * (0.6 + Math.random() * .6), vy: Math.sin(ang) * fuerza * (0.6 + Math.random() * .6),
+    g: .28, roce: .985, w: 7 + Math.random() * 6, h: 10 + Math.random() * 8,
+    r: Math.random() * Math.PI, vr: (Math.random() - .5) * .35, redondo: false,
+    c: colores[Math.floor(Math.random() * colores.length)], vida: 200 + Math.random() * 60
+  });
+  const H = innerHeight, W = innerWidth;
+  // Dos cañones desde las esquinas de abajo
+  lanzar(Array.from({length: 90}, () => pieza(0, H, -Math.PI/3 + (Math.random() - .5) * .5, 22)));
+  lanzar(Array.from({length: 90}, () => pieza(W, H, -2 * Math.PI/3 + (Math.random() - .5) * .5, 22)));
+  // Y una lluvia desde arriba un instante después
+  setTimeout(() => lanzar(Array.from({length: 80}, () => ({ ...pieza(Math.random() * W, -20, Math.PI/2, 2), g: .12 }))), 450);
+  // Chispas alrededor del ícono
+  setTimeout(() => {
+    const ic = document.querySelector("#vGracias .icono");
+    if(!ic) return;
+    const r = ic.getBoundingClientRect();
+    chispazo(r.left + r.width/2, r.top + r.height/2, "#facc15", 34);
+  }, 250);
+}
+
+/* Chispas flotando en el escenario */
+(function(){
+  if(sinMovimiento) return;
+  const cont = $("chispas");
+  for(let i = 0; i < 16; i++){
+    const c = document.createElement("i");
+    c.style.left = (Math.random() * 100) + "%";
+    c.style.animationDuration = (4 + Math.random() * 5) + "s";
+    c.style.animationDelay = (Math.random() * 6) + "s";
+    const t = 2 + Math.random() * 3;
+    c.style.width = c.style.height = t + "px";
+    cont.appendChild(c);
+  }
+})();
+
+onSnapshot(doc(db, "config", "talentFotos"), snap => {
+  fotos = (snap.exists() && snap.data().fotos) || {};
+  if(cfg) render();
+}, () => {});
+
+const espera = setTimeout(() => __fallo("No se pudo conectar con Firestore. Revisa que el projectId de firebase-config.js sea correcto."), 10000);
+onSnapshot(doc(db, "talent", "config"), snap => {
+  clearTimeout(espera);
+  cfg = snap.exists() ? snap.data() : null;
+  render();
+}, err => {
+  clearTimeout(espera);
+  console.error(err);
+  __fallo("Firestore rechazó la lectura (" + err.code + "). ¿Publicaste las reglas nuevas?");
+  cerrado("No se pudo cargar la votación", "Recarga la página en un momento.", "fa-triangle-exclamation");
+});
+</script>
+</body>
+</html>

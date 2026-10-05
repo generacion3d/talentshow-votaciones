@@ -1,0 +1,480 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>Resultados | Talento con Propósito</title>
+<meta name="theme-color" content="#09090b">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+<style>
+  :root{
+    --telon:#09090b; --telon-2:#111113; --luz:#f4f4f5; --tenue:#a1a1aa;
+    --oro:#facc15; --plata:#d4d4d8; --bronce:#f59e5b; --linea:#27272a;
+    --orange:#f97316; --orange-deep:#ea580c;
+    --verde:#7FD8A6; --rojo:#FF9C8C;
+    box-sizing:border-box;
+    padding-top:env(safe-area-inset-top,0px);
+    padding-bottom:env(safe-area-inset-bottom,0px);
+  }
+  *,*::before,*::after{box-sizing:inherit}
+  html,body{margin:0;min-height:100%}
+  body{font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,Arial,sans-serif;color:var(--luz);-webkit-font-smoothing:antialiased;background:radial-gradient(circle at 15% 0%, rgba(249,115,22,.16), transparent 30%),var(--telon)}
+  main{max-width:760px;margin:0 auto;padding:28px 18px 60px}
+  h1{font-size:clamp(2rem,7vw,2.8rem);font-weight:900;letter-spacing:-.04em;line-height:1;margin:0 0 6px}
+  h2{font-size:1.25rem;font-weight:800;margin:0 0 12px}
+  p{line-height:1.45}
+  .sub{color:var(--tenue);margin:0 0 24px}
+  .bloque{background:var(--telon-2);border:1px solid rgba(255,255,255,.08);border-radius:20px;padding:20px;margin-bottom:16px}
+  label{display:block;font-weight:600;margin:12px 0 6px}
+  input,textarea{width:100%;font:inherit;color:var(--luz);background:var(--telon);border:1px solid var(--linea);border-radius:10px;padding:11px 12px}
+  textarea{min-height:170px;resize:vertical;line-height:1.5}
+  input:focus-visible,textarea:focus-visible,button:focus-visible{outline:3px solid rgba(249,115,22,.6);outline-offset:2px}
+  input:focus,textarea:focus{border-color:var(--orange)}
+  button{font:inherit;font-weight:700;border:none;border-radius:12px;padding:11px 16px;cursor:pointer}
+  .prim{background:linear-gradient(135deg,var(--orange),var(--orange-deep));color:#fff;box-shadow:0 8px 20px rgba(249,115,22,.25)}
+  .sec{background:transparent;color:var(--luz);border:1px solid var(--linea)}
+  .peligro{background:transparent;color:var(--rojo);border:1px solid rgba(255,156,140,.4)}
+  .fila{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+  .msg{font-size:.95rem;margin:10px 0 0;color:var(--tenue)}
+  .msg.err{color:var(--rojo)}
+
+  .cabecera{display:flex;justify-content:space-between;align-items:flex-start;gap:12px;flex-wrap:wrap;margin-bottom:20px}
+  .estadoVot{display:flex;align-items:center;gap:14px;flex-wrap:wrap}
+  .pill{display:inline-flex;align-items:center;gap:8px;font-weight:700;padding:6px 12px;border-radius:999px;background:var(--telon);border:1px solid var(--linea)}
+  .pill::before{content:"";width:10px;height:10px;border-radius:50%;background:var(--rojo)}
+  .pill.abierta::before{background:var(--verde)}
+  .total{font-size:3rem;font-weight:800;line-height:1}
+  .total small{display:block;font-size:.9rem;font-weight:600;color:var(--tenue);margin-top:4px}
+
+  .ranking{list-style:none;margin:0;padding:0}
+  .ranking li{display:grid;grid-template-columns:44px 1fr auto;gap:12px;align-items:center;padding:12px 0;border-bottom:1px solid var(--linea)}
+  .ranking li:last-child{border-bottom:none}
+  .lugar{width:40px;height:40px;border-radius:50%;display:grid;place-items:center;font-weight:800;background:var(--telon);color:var(--tenue)}
+  .ranking li:nth-child(1) .lugar{background:var(--oro);color:var(--telon)}
+  .ranking li:nth-child(2) .lugar{background:var(--plata);color:var(--telon)}
+  .ranking li:nth-child(3) .lugar{background:var(--bronce);color:var(--telon)}
+  .nom{font-weight:700;font-size:1.1rem}
+  .detalle{font-size:.85rem;color:var(--tenue);margin-top:2px}
+  .barraP{height:6px;border-radius:3px;background:var(--telon);margin-top:8px;overflow:hidden}
+  .barraP i{display:block;height:100%;background:linear-gradient(90deg,var(--orange),var(--oro));border-radius:3px;transition:width .4s ease}
+  .pts{font-size:1.6rem;font-weight:800;text-align:right;line-height:1}
+  .pts small{display:block;font-size:.75rem;color:var(--tenue);font-weight:600}
+  .vacio{color:var(--tenue);margin:0}
+
+  .uid{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.85rem;background:var(--telon);padding:8px 10px;border-radius:8px;overflow-x:auto;white-space:nowrap}
+  .diag{position:fixed;top:calc(12px + env(safe-area-inset-top,0px));left:12px;right:12px;z-index:50;max-width:560px;margin:0 auto;background:#FFE9E4;color:#5A1208;border-radius:12px;padding:14px 16px;font-size:.98rem;line-height:1.45;font-weight:600;box-shadow:0 6px 24px rgba(0,0,0,.35)}
+  .editor{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:10px}
+  .editor li{display:grid;grid-template-columns:22px 58px 1fr auto;gap:10px;align-items:start;background:var(--telon);border:1px solid var(--linea);border-radius:12px;padding:10px}
+  .editor .num{font-weight:800;color:var(--tenue);padding-top:11px;text-align:center}
+  .editor .campos{display:flex;flex-direction:column;gap:6px;min-width:0}
+  .editor .campos input{background:#18181b}
+  .editor .campos input.integ{font-size:.92rem;padding:9px 12px}
+  .editor .acciones{display:flex;flex-direction:column;gap:4px}
+  .mini{padding:5px 9px;border-radius:8px;background:transparent;color:var(--tenue);border:1px solid var(--linea);font-size:.85rem;line-height:1}
+  .integrantes{font-size:.9rem;color:var(--tenue);margin-top:1px}
+  .fotoBtn{position:relative;width:58px;height:58px;border-radius:14px;border:1.5px dashed #3f3f46;background:#18181b center/cover no-repeat;display:grid;place-items:center;cursor:pointer;color:var(--orange);font-size:1.2rem;padding:0;overflow:visible}
+  .fotoBtn.con{border:1.5px solid var(--orange)}
+  .fotoBtn.con > i{display:none}
+  .fotoBtn.subiendo{opacity:.5;pointer-events:none}
+  .fotoBtn input{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+  .sinFoto{position:absolute;top:-7px;right:-7px;width:22px;height:22px;border-radius:50%;border:none;padding:0;background:#27272a;color:#fff;font-size:.7rem;display:grid;place-items:center;cursor:pointer}
+  .nom{display:flex;align-items:center;gap:10px}
+  .av{width:38px;height:38px;border-radius:50%;object-fit:cover;flex:none;border:2px solid var(--linea)}
+  [hidden]{display:none!important}
+  @media (prefers-reduced-motion:reduce){*{transition:none!important}}
+</style>
+</head>
+<body>
+<div class="diag" id="diag" role="alert" hidden></div>
+<script>
+  window.__fallo = function(msg){
+    var d = document.getElementById('diag');
+    if(d && d.hidden){ d.textContent = msg; d.hidden = false; }
+  };
+  window.addEventListener('error', function(e){ __fallo('Error: ' + e.message); });
+  window.addEventListener('unhandledrejection', function(e){ __fallo('Error: ' + ((e.reason && e.reason.message) || e.reason)); });
+  if(location.protocol === 'file:'){
+    __fallo('Estás abriendo el archivo directo desde la computadora (file://). Así no cargan los módulos de Firebase: súbelo a GitHub Pages o ábrelo con Live Server.');
+  }
+  setTimeout(function(){
+    if(!window.__arranco) __fallo('La página no arrancó. Revisa que firebase-config.js esté en la misma carpeta y abre la consola (F12) para ver el error.');
+  }, 7000);
+</script>
+<main>
+  <p id="cargando" style="color:var(--tenue);text-align:center;padding:60px 0">Cargando…</p>
+  <!-- LOGIN -->
+  <section id="vLogin" hidden>
+    <h1>Resultados</h1>
+    <p class="sub">Talento con Propósito · Solo para la organización.</p>
+    <div class="bloque">
+      <label for="email">Correo</label>
+      <input id="email" type="email" autocomplete="username">
+      <label for="pass">Contraseña</label>
+      <input id="pass" type="password" autocomplete="current-password">
+      <div class="fila" style="margin-top:16px"><button class="prim" id="btnEntrar">Entrar</button></div>
+      <p class="msg err" id="loginErr" hidden></p>
+    </div>
+  </section>
+
+  <!-- PANEL -->
+  <section id="vPanel" hidden>
+    <div class="cabecera">
+      <div>
+        <h1>Resultados</h1>
+        <p class="sub" id="rondaTxt"></p>
+      </div>
+      <button class="sec" id="btnSalir">Cerrar sesión</button>
+    </div>
+
+    <div class="bloque" id="sinPermiso" hidden>
+      <h2>Falta autorizar tu cuenta</h2>
+      <p>Firestore no te deja leer los votos con esta cuenta. Revisa que este correo esté en la lista de <b>esAdmin()</b> en las reglas y que las hayas publicado:</p>
+      <div class="uid" id="uid"></div>
+    </div>
+
+    <div class="bloque">
+      <div class="cabecera" style="margin:0">
+        <div class="estadoVot">
+          <span class="pill" id="pill">Cerrada</span>
+          <button class="prim" id="btnToggle">Abrir votación</button>
+        </div>
+        <div class="total"><span id="total">0</span><small>votos</small></div>
+      </div>
+    </div>
+
+    <div class="bloque">
+      <h2>Ranking</h2>
+      <ol class="ranking" id="ranking"></ol>
+      <p class="vacio" id="vacio">Aún no hay votos en esta ronda.</p>
+    </div>
+
+    <div class="bloque">
+      <h2>Talentos</h2>
+      <p class="msg" style="margin-top:0;margin-bottom:12px">En el orden en que se presentan. Mínimo 3. Los nombres de talento no se pueden repetir.</p>
+      <ol class="editor" id="editor"></ol>
+      <div class="fila" style="margin-top:12px">
+        <button class="sec" id="btnAgregar">Agregar talento</button>
+        <button class="prim" id="btnGuardar">Guardar talentos</button>
+      </div>
+      <p class="msg" id="guardarMsg" hidden></p>
+    </div>
+
+    <div class="bloque">
+      <h2>Ronda nueva</h2>
+      <p class="msg" style="margin-top:0">Empieza el conteo desde cero y deja votar otra vez a todos los dispositivos. Los votos anteriores quedan guardados pero no se cuentan.</p>
+      <div class="fila" style="margin-top:12px"><button class="peligro" id="btnRonda">Empezar ronda nueva</button></div>
+    </div>
+  </section>
+</main>
+
+<script>
+  // Busca firebase-config.js en las ubicaciones más comunes del repo
+  window.__rutasConfig = ['firebase-config.js', '../firebase-config.js', 'js/firebase-config.js', '../js/firebase-config.js'];
+  window.__configLista = new Promise(function(res){
+    (function probar(i){
+      if(window.FIREBASE_CONFIG || i >= __rutasConfig.length) return res(window.FIREBASE_CONFIG);
+      var s = document.createElement('script');
+      s.src = __rutasConfig[i];
+      s.onload = function(){ window.FIREBASE_CONFIG ? res(window.FIREBASE_CONFIG) : probar(i + 1); };
+      s.onerror = function(){ probar(i + 1); };
+      document.head.appendChild(s);
+    })(0);
+  });
+</script>
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+import { getAuth, onAuthStateChanged, signInWithEmailAndPassword, signOut } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-auth.js";
+import { getFirestore, doc, collection, query, where, onSnapshot, setDoc, deleteField } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
+
+await window.__configLista;
+if(!window.FIREBASE_CONFIG){
+  __fallo("No se encontró firebase-config.js. Lo busqué en: " + window.__rutasConfig.join(", ") + " (relativo a " + location.pathname + "). Revisa el nombre exacto y dónde está en el repo.");
+  throw new Error("Sin config");
+}
+if(/PEGA_AQUI|TU-PROYECTO/.test(JSON.stringify(window.FIREBASE_CONFIG))){
+  __fallo("firebase-config.js todavía tiene los valores de ejemplo. Pega la configuración real de tu proyecto de Firebase.");
+  throw new Error("Config de ejemplo");
+}
+window.__arranco = true;
+const firebaseConfig = window.FIREBASE_CONFIG;
+
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
+const $ = id => document.getElementById(id);
+const cfgRef = doc(db, "talent", "config");
+
+let cfg = null, votos = [], unsubCfg = null, unsubVotos = null, rondaEscuchada = null;
+let fotos = {}, unsubFotos = null;
+const fotosRef = doc(db, "config", "talentFotos");
+
+const nuevaRonda = () => "r" + Date.now();
+
+// ---------- Auth ----------
+$("btnEntrar").addEventListener("click", async () => {
+  $("loginErr").hidden = true;
+  try{
+    await signInWithEmailAndPassword(auth, $("email").value.trim(), $("pass").value);
+  }catch(e){
+    $("loginErr").textContent = "Correo o contraseña incorrectos.";
+    $("loginErr").hidden = false;
+  }
+});
+$("pass").addEventListener("keydown", e => { if(e.key === "Enter") $("btnEntrar").click(); });
+$("btnSalir").addEventListener("click", () => signOut(auth));
+
+onAuthStateChanged(auth, user => {
+  $("cargando").hidden = true;
+  if(unsubCfg){ unsubCfg(); unsubCfg = null; }
+  if(unsubFotos){ unsubFotos(); unsubFotos = null; }
+  if(unsubVotos){ unsubVotos(); unsubVotos = null; rondaEscuchada = null; }
+  $("vLogin").hidden = !!user;
+  $("vPanel").hidden = !user;
+  if(!user) return;
+  $("uid").textContent = user.email;
+  unsubCfg = onSnapshot(cfgRef, snap => {
+    cfg = snap.exists() ? snap.data() : null;
+    pintarConfig();
+    escucharVotos();
+  });
+  unsubFotos = onSnapshot(fotosRef, snap => {
+    fotos = (snap.exists() && snap.data().fotos) || {};
+    pintarEditor();
+    pintarRanking();
+  });
+});
+
+// ---------- Config ----------
+function pintarConfig(){
+  const abierto = !!cfg?.abierto;
+  $("pill").textContent = abierto ? "Votación abierta" : "Votación cerrada";
+  $("pill").classList.toggle("abierta", abierto);
+  $("btnToggle").textContent = abierto ? "Cerrar votación" : "Abrir votación";
+  $("rondaTxt").textContent = cfg?.ronda
+    ? "Ronda iniciada el " + new Date(Number(cfg.ronda.slice(1))).toLocaleString("es-CR", {dateStyle:"medium", timeStyle:"short"})
+    : "Agrega los talentos para empezar.";
+  if(!editando){
+    filas = detallesDe(cfg).map(d => ({ ...d }));
+    if(!filas.length) filas = [vacia(), vacia(), vacia()];
+    pintarEditor();
+  }
+}
+
+// ---------- Editor de talentos ----------
+let filas = [], editando = false;
+const nuevoId = () => Array.from(crypto.getRandomValues(new Uint8Array(10)), n => "abcdefghijklmnopqrstuvwxyz0123456789"[n % 36]).join("");
+const vacia = () => ({ id:nuevoId(), talento:"", integrantes:"" });
+
+function detallesDe(c){
+  const base = (Array.isArray(c?.detalles) && c.detalles.length)
+    ? c.detalles
+    : (c?.participantes || []).map(t => ({ talento:t, integrantes:"" }));
+  return base.map(d => ({ id: d.id || nuevoId(), talento: d.talento, integrantes: d.integrantes || "" }));
+}
+
+// ---------- Fotos ----------
+async function comprimir(file){
+  const url = URL.createObjectURL(file);
+  try{
+    const img = await new Promise((ok, mal) => { const i = new Image(); i.onload = () => ok(i); i.onerror = () => mal(new Error("No se pudo abrir la foto. Prueba con otra o toma una captura.")); i.src = url; });
+    const w = img.naturalWidth, h = img.naturalHeight, lado = Math.min(w, h);
+    const sx = (w - lado) / 2, sy = (h - lado) * 0.3;   // un poco hacia arriba: ahí suelen estar las caras
+    const T = 320, c = document.createElement("canvas");
+    c.width = c.height = T;
+    c.getContext("2d").drawImage(img, sx, sy, lado, lado, 0, 0, T, T);
+    return c.toDataURL("image/jpeg", 0.72);
+  }finally{ URL.revokeObjectURL(url); }
+}
+
+async function subirFoto(f, archivo, boton){
+  boton.classList.add("subiendo");
+  try{
+    const dato = await comprimir(archivo);
+    const total = Object.entries(fotos).filter(([k]) => k !== f.id).reduce((n, [, v]) => n + v.length, 0) + dato.length;
+    if(total > 950000) throw new Error("Ya no caben más fotos. Quita alguna que no se use.");
+    await setDoc(fotosRef, { fotos: { [f.id]: dato } }, { merge: true });
+    if(!(cfg?.detalles || []).some(d => d.id === f.id)){
+      mostrarMsg("Foto lista. Dale a Guardar talentos para que quede amarrada a este talento.");
+    }
+  }catch(e){
+    if(e.code) errorPermiso(e); else mostrarMsg(e.message, true);
+  }finally{ boton.classList.remove("subiendo"); }
+}
+
+async function quitarFoto(id){
+  try{ await setDoc(fotosRef, { fotos: { [id]: deleteField() } }, { merge: true }); }
+  catch(e){ errorPermiso(e); }
+}
+
+function pintarEditor(){
+  const ol = $("editor");
+  ol.innerHTML = "";
+  filas.forEach((f,i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="num">${i+1}</span>
+      <label class="fotoBtn" title="Tomar o elegir foto">
+        <i class="fa-solid fa-camera"></i>
+        <input type="file" accept="image/*" capture="environment" aria-label="Foto del talento ${i+1}">
+      </label>
+      <div class="campos">
+        <input class="tal" placeholder="Nombre del talento" aria-label="Nombre del talento ${i+1}">
+        <input class="integ" placeholder="Participantes (ej. Ana, Luis y Sofi)" aria-label="Participantes del talento ${i+1}">
+      </div>
+      <div class="acciones">
+        <button class="mini" data-a="subir" aria-label="Subir" ${i===0?"disabled":""}>▲</button>
+        <button class="mini" data-a="bajar" aria-label="Bajar" ${i===filas.length-1?"disabled":""}>▼</button>
+        <button class="mini" data-a="quitar" aria-label="Quitar">✕</button>
+      </div>`;
+    const [tal, integ] = li.querySelectorAll(".campos input");
+    const fb = li.querySelector(".fotoBtn");
+    if(fotos[f.id]){
+      fb.classList.add("con");
+      fb.style.backgroundImage = `url("${fotos[f.id]}")`;
+      const x = document.createElement("button");
+      x.type = "button"; x.className = "sinFoto"; x.setAttribute("aria-label", "Quitar foto"); x.textContent = "✕";
+      x.addEventListener("click", ev => { ev.preventDefault(); ev.stopPropagation(); if(confirm("¿Quitar esta foto?")) quitarFoto(f.id); });
+      fb.appendChild(x);
+    }
+    fb.querySelector("input").addEventListener("change", ev => {
+      const a = ev.target.files[0];
+      ev.target.value = "";
+      if(a) subirFoto(f, a, fb);
+    });
+    tal.value = f.talento; integ.value = f.integrantes;
+    tal.addEventListener("input", () => { f.talento = tal.value; editando = true; });
+    integ.addEventListener("input", () => { f.integrantes = integ.value; editando = true; });
+    li.querySelectorAll(".mini").forEach(b => b.addEventListener("click", () => {
+      editando = true;
+      const a = b.dataset.a;
+      if(a === "quitar") filas.splice(i,1);
+      if(a === "subir") [filas[i-1], filas[i]] = [filas[i], filas[i-1]];
+      if(a === "bajar") [filas[i+1], filas[i]] = [filas[i], filas[i+1]];
+      pintarEditor();
+    }));
+    ol.appendChild(li);
+  });
+}
+
+$("btnAgregar").addEventListener("click", () => {
+  editando = true;
+  filas.push(vacia());
+  pintarEditor();
+  const inputs = $("editor").querySelectorAll("input.tal");
+  inputs[inputs.length-1].focus();
+});
+
+async function guardarConfig(cambios){
+  const base = { abierto:false, participantes:[], ronda: cfg?.ronda || nuevaRonda() };
+  await setDoc(cfgRef, { ...base, ...cfg, ...cambios });
+}
+
+$("btnToggle").addEventListener("click", async () => {
+  if(!cfg || (cfg.participantes || []).length < 3){
+    return mostrarMsg("Guarda al menos 3 talentos antes de abrir la votación.", true);
+  }
+  try{ await guardarConfig({ abierto: !cfg.abierto }); }
+  catch(e){ errorPermiso(e); }
+});
+
+$("btnGuardar").addEventListener("click", async () => {
+  const limpias = filas
+    .map(f => ({ id: f.id, talento: f.talento.trim(), integrantes: f.integrantes.trim() }))
+    .filter(f => f.talento);
+  const vistos = new Set();
+  for(const f of limpias){
+    const k = f.talento.toLowerCase();
+    if(vistos.has(k)) return mostrarMsg(`"${f.talento}" está repetido. Cada talento necesita un nombre distinto.`, true);
+    vistos.add(k);
+  }
+  if(limpias.length < 3) return mostrarMsg("Necesitas al menos 3 talentos con nombre.", true);
+  try{
+    await guardarConfig({ participantes: limpias.map(f => f.talento), detalles: limpias });
+    const vivos = new Set(limpias.map(f => f.id));
+    const huerfanas = Object.keys(fotos).filter(k => !vivos.has(k));
+    if(huerfanas.length) await setDoc(fotosRef, { fotos: Object.fromEntries(huerfanas.map(k => [k, deleteField()])) }, { merge: true });
+    editando = false;
+    mostrarMsg("Talentos guardados.");
+  }catch(e){ errorPermiso(e); }
+});
+
+$("btnRonda").addEventListener("click", async () => {
+  if(!confirm("¿Empezar una ronda nueva? El ranking vuelve a cero y todos pueden votar otra vez.")) return;
+  try{ await guardarConfig({ ronda: nuevaRonda(), abierto:false }); }
+  catch(e){ errorPermiso(e); }
+});
+
+function mostrarMsg(t, err=false){
+  const m = $("guardarMsg");
+  m.textContent = t; m.classList.toggle("err", err); m.hidden = false;
+  m.scrollIntoView({block:"nearest", behavior:"smooth"});
+}
+function errorPermiso(e){
+  console.error(e);
+  if(e.code === "permission-denied") $("sinPermiso").hidden = false;
+  else mostrarMsg("No se pudo guardar. Revisa tu conexión.", true);
+}
+
+// ---------- Votos ----------
+function escucharVotos(){
+  const ronda = cfg?.ronda;
+  if(ronda === rondaEscuchada) return pintarRanking();
+  if(unsubVotos){ unsubVotos(); unsubVotos = null; }
+  rondaEscuchada = ronda;
+  votos = [];
+  if(!ronda) return pintarRanking();
+  const q = query(collection(db, "talentVotos"), where("ronda", "==", ronda));
+  unsubVotos = onSnapshot(q, snap => {
+    $("sinPermiso").hidden = true;
+    votos = snap.docs.map(d => d.data());
+    pintarRanking();
+  }, e => errorPermiso(e));
+}
+
+function pintarRanking(){
+  const tabla = {};
+  const fila = n => tabla[n] ??= { nombre:n, pts:0, p1:0, p2:0, p3:0 };
+  (cfg?.participantes || []).forEach(fila);
+  votos.forEach(v => {
+    if(v.p1){ fila(v.p1).pts += 3; tabla[v.p1].p1++; }
+    if(v.p2){ fila(v.p2).pts += 2; tabla[v.p2].p2++; }
+    if(v.p3){ fila(v.p3).pts += 1; tabla[v.p3].p3++; }
+  });
+  const integ = Object.fromEntries(detallesDe(cfg).map(d => [d.talento, d.integrantes]));
+  const fotoDe = Object.fromEntries((cfg?.detalles || []).filter(d => d.id && fotos[d.id]).map(d => [d.talento, fotos[d.id]]));
+  const orden = Object.values(tabla).sort((a,b) =>
+    b.pts - a.pts || b.p1 - a.p1 || b.p2 - a.p2 || a.nombre.localeCompare(b.nombre, "es"));
+  const max = Math.max(1, ...orden.map(r => r.pts));
+
+  $("total").textContent = votos.length;
+  $("vacio").hidden = votos.length > 0;
+  const ol = $("ranking");
+  ol.innerHTML = "";
+  if(!votos.length) return;
+  orden.forEach((r,i) => {
+    const li = document.createElement("li");
+    li.innerHTML = `
+      <span class="lugar">${i+1}</span>
+      <div>
+        <div class="nom"></div>
+        <div class="integrantes"></div>
+        <div class="detalle">${r.p1} veces 1°, ${r.p2} veces 2°, ${r.p3} veces 3°</div>
+        <div class="barraP"><i style="width:${(r.pts/max*100).toFixed(1)}%"></i></div>
+      </div>
+      <div class="pts">${r.pts}<small>pts</small></div>`;
+    const nomEl = li.querySelector(".nom");
+    if(fotoDe[r.nombre]){
+      const im = document.createElement("img");
+      im.className = "av"; im.alt = ""; im.src = fotoDe[r.nombre];
+      nomEl.appendChild(im);
+    }
+    nomEl.appendChild(document.createTextNode(r.nombre));
+    const iEl = li.querySelector(".integrantes");
+    if(integ[r.nombre]) iEl.textContent = integ[r.nombre]; else iEl.remove();
+    ol.appendChild(li);
+  });
+}
+</script>
+</body>
+</html>
